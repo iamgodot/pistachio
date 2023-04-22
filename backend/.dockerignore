@@ -1,0 +1,9 @@
+**/*.pyc
+__pycache__
+.pytest_cache
+.venv
+.ruff_cache
+__pypackages__
+*.egg-info
+.coverage
+.tox
