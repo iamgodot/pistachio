@@ -1,0 +1,24 @@
+[project]
+name = "pistachio"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "iamgodot", email = "xugodot@gmail.com"},
+]
+dependencies = [
+    "flask>=2.2.3",
+    "flask-sqlalchemy>=3.0.3",
+    "gunicorn>=20.1.0",
+    "python-dotenv>=1.0.0",
+    "gevent>=22.10.2",
+]
+requires-python = ">=3.8"
+license = {text = "MIT"}
+
+[tool.pyright]
+extraPaths = ["__pypackages__/3.11/lib/"]
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "pytest>=7.3.1",
+]
