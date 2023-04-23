@@ -1,0 +1,69 @@
+# https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pistachio-backend
+  namespace: default
+  labels:
+    app: pistachio-backend
+spec:
+  selector:
+    matchLabels:
+      app: pistachio-backend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: pistachio-backend
+    spec:
+      containers:
+        - name: pistachio-backend
+          image: iamgodot/pistachio:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9527
+      imagePullSecrets:
+        - name: github-container-registry
+      restartPolicy: Always
+---
+# https://kubernetes.io/docs/concepts/services-networking/service/
+apiVersion: v1
+kind: Service
+metadata:
+  name: pistachio
+  namespace: default
+spec:
+  selector:
+    app: "pistachio-backend"
+  ports:
+    - name: http
+      port: 80
+      targetPort: 9527
+---
+# https://kubernetes.io/docs/concepts/services-networking/ingress/
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pistachio
+  namespace: default
+  annotations:
+    # kubernetes.io/ingress.class: nginx
+    cert-manager.io/issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - pistachio.iamgodot.com
+      secretName: pistachio-tls
+  rules:
+    - host: pistachio.iamgodot.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: pistachio
+                port:
+                  number: 80
+---
