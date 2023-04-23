@@ -42,6 +42,11 @@ def hash(s):
     return md5(s.encode()).hexdigest()
 
 
+@app.get("/")
+def index():
+    return "<html><h3>Welcome to Pistachio</h3></html>"
+
+
 @bp.post("/register")
 def register():
     try:
