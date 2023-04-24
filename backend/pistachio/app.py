@@ -44,7 +44,7 @@ def hash(s):
 
 @app.get("/")
 def index():
-    return "<html><h3>Welcome to Pistachio</h3></html>"
+    return "<html><h2>Welcome to Pistachio</h2></html>"
 
 
 @bp.post("/register")
