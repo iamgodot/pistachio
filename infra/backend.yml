@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: pistachio-backend
-          image: iamgodot/pistachio:latest
+          image: ghcr.io/iamgodot/pistachio:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 9527

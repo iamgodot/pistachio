@@ -48,6 +48,32 @@ jobs:
         with:
           context: "{{defaultContext}}:backend"
           push: true
-          tags: ghcr.io/iamgodot/pistachio:latest
+          tags: |
+            ghcr.io/iamgodot/pistachio:latest
+            ghcr.io/iamgodot/pistachio:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+  deploy:
+    name: Deploy
+    needs: [test, build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set the Kubernetes context
+        uses: azure/k8s-set-context@v3
+        with:
+          method: service-account
+          k8s-url: https://7d95d364-5863-4782-af23-87f98383522b.vultr-k8s.com:6443
+          k8s-secret: ${{ secrets.KUBERNETES_SECRET }}
+
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Deploy to the Kubernetes cluster
+        uses: azure/k8s-deploy@v4
+        with:
+          action: deploy
+          namespace: default
+          manifests: |
+            infra/backend.yml
+          images: |
+            ghcr.io/iamgodot/pistachio:${{ github.sha }}
