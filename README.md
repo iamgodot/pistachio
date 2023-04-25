@@ -1,2 +1,3 @@
-# pistachio
-A file-sharing social platform app.
+# Pistachio
+
+A file-oriented sharing platform.
