@@ -53,10 +53,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - pistachio.iamgodot.com
+        - api.pistachio.win
       secretName: pistachio-tls
   rules:
-    - host: pistachio.iamgodot.com
+    - host: api.pistachio.win
       http:
         paths:
           - path: /
