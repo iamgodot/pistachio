@@ -176,4 +176,4 @@ def foo(post_id):
     return {"error": "No post found"}, 404
 
 
-app.register_blueprint(bp, url_prefix="/api/v1")
+app.register_blueprint(bp, url_prefix="/v1")

@@ -1,6 +1,6 @@
 import pytest
 
-BASE_URL = "/api/v1"
+BASE_URL = "/v1"
 
 
 @pytest.mark.usefixtures("db")
