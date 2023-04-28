@@ -23,12 +23,23 @@ def register(client):
 def test_login(client):
     resp = client.post(BASE_URL + "/login")
     assert resp.status_code == 400
-    user_id = register(client)
+    register(client)
     resp = client.post(
         BASE_URL + "/login", json={"username": "foo", "password": "secret"}
     )
     assert resp.status_code == 200
-    assert resp.json["id"] == user_id
+    assert resp.json["access_token"]
+
+
+@pytest.mark.usefixtures("db")
+def test_login_by_github(client, mocker):
+    mocker.patch("pistachio.app.get_gh_access_token")
+    mocker.patch("pistachio.app.get_gh_user_info", return_value={"login": "foo"})
+    resp = client.post(
+        BASE_URL + "/login", json={"type": "github", "github_code": "foo"}
+    )
+    assert resp.status_code == 200
+    assert resp.json["access_token"]
 
 
 @pytest.mark.usefixtures("db")

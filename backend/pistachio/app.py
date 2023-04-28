@@ -1,12 +1,20 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from hashlib import md5
 from os import environ
+from uuid import uuid4
 
+import jwt
+import requests
 from flask import Blueprint, Flask, request
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////tmp/prod.db"
+app.config["JWT_SECRET"] = "development"
+app.config["ACCESS_TOKEN_TTL"] = 60 * 10  # 10 mins
+app.config["REFRESH_TOKEN_TTL"] = 60 * 60 * 24 * 7  # 1 week
+app.config["GITHUB_CLIENT_ID"] = ""
+app.config["GITHUB_CLIENT_SECRET"] = ""
 db = SQLAlchemy()
 db.init_app(app)
 bp = Blueprint("core", __name__)
@@ -15,9 +23,9 @@ bp = Blueprint("core", __name__)
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30), unique=True, nullable=False)
-    nickname = db.Column(db.String(30), nullable=False)
-    password_hash = db.Column(db.String(16), nullable=False)
-    description = db.Column(db.Text, nullable=False)
+    nickname = db.Column(db.String(30), nullable=False, default="")
+    password_hash = db.Column(db.String(16), nullable=False, default="")
+    description = db.Column(db.Text, nullable=False, default="")
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
@@ -64,17 +72,92 @@ def register():
         return {"error": str(e)}, 400
 
 
+def encode_token(payload, algorithm="HS256", headers=None):
+    return jwt.encode(
+        payload, app.config["JWT_SECRET"], algorithm=algorithm, headers=headers
+    )
+
+
+def get_jti():
+    return uuid4().hex
+
+
+def get_exp(refresh=False):
+    return datetime.now(tz=timezone.utc) + timedelta(
+        seconds=app.config["ACCESS_TOKEN_TTL"]
+        if not refresh
+        else app.config["REFRESH_TOKEN_TTL"]
+    )
+
+
+def generate_user_token(sub, jti=None, exp=None, refresh=False):
+    if not jti:
+        jti = get_jti()
+    if not exp:
+        exp = get_exp(refresh)
+    return encode_token({"sub": sub, "jti": jti, "exp": exp, "refresh": refresh})
+
+
+def get_gh_access_token(code):
+    resp = requests.post(
+        "https://github.com/login/oauth/access_token",
+        json={
+            "client_id": app.config["GITHUB_CLIENT_ID"],
+            "client_secret": app.config["GITHUB_CLIENT_SECRET"],
+            "code": code,
+        },
+    )
+    return resp.json()["access_token"]
+
+
+def get_gh_user_info(token):
+    return requests.get(
+        "https://api.github.com/user",
+        headers={
+            "Accept": "application/vnd.github+json",
+            "Authorization": f"Bearer {token}",
+        },
+    )
+
+
 @bp.post("/login")
 def login():
+    """Login user with authorization token.
+
+    Params:
+        type: `github` or default to use username/password.
+        github_code: for GitHub authorization.
+    Returns:
+        access_token: a JWT token with expiration.
+        refresh_token: another JWT token.
+    """
     try:
         payload = request.get_json()
-        user = db.session.execute(
-            db.select(User).filter_by(name=payload["username"])
-        ).scalar_one()
-        if hash(payload["password"]) == user.password_hash:
-            return {"id": user.id}
+        if payload.get("type") == "github":
+            try:
+                gh_token = get_gh_access_token(payload["github_code"])
+                gh_user_info = get_gh_user_info(gh_token)
+                gh_username = gh_user_info["login"]
+                if not (
+                    user := db.session.execute(
+                        db.select(User).filter_by(name=gh_username)
+                    ).scalar()
+                ):
+                    user = User(name=gh_username)
+            except requests.HTTPError:
+                return {"error": "Failed to authorize by GitHub"}, 400
         else:
-            return {"error": "Invalid password"}, 400
+            user = db.session.execute(
+                db.select(User).filter_by(name=payload["username"])
+            ).scalar()
+            if not user:
+                return {"error": "User not found"}, 400
+            elif hash(payload["password"]) != user.password_hash:
+                return {"error": "Invalid password"}, 400
+        return {
+            "access_token": generate_user_token(user.id),
+            "refresh_token": generate_user_token(user.id, refresh=True),
+        }
     except Exception as e:
         return {"error": str(e)}, 400
 
