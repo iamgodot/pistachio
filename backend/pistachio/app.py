@@ -8,13 +8,12 @@ import requests
 from flask import Blueprint, Flask, request
 from flask_sqlalchemy import SQLAlchemy
 
+from .config import Config
+
 app = Flask(__name__)
+app.config.from_object(Config)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////tmp/prod.db"
-app.config["JWT_SECRET"] = "development"
-app.config["ACCESS_TOKEN_TTL"] = 60 * 10  # 10 mins
-app.config["REFRESH_TOKEN_TTL"] = 60 * 60 * 24 * 7  # 1 week
-app.config["GITHUB_CLIENT_ID"] = ""
-app.config["GITHUB_CLIENT_SECRET"] = ""
+
 db = SQLAlchemy()
 db.init_app(app)
 bp = Blueprint("core", __name__)
