@@ -70,14 +70,17 @@ def test_user(client):
 
 @pytest.mark.usefixtures("db")
 def test_post(client):
+    from io import BytesIO
+
+    from werkzeug.datastructures import FileStorage
+
     user_id = register(client)
     resp = client.post(
         BASE_URL + "/posts",
-        json={
+        data={
             "user_id": user_id,
-            "filename": "test_file",
-            "download_url": "http://example.com/test_file",
-            "description": "",
+            "file": FileStorage(BytesIO(b"Hello world"), filename="test_file"),
+            "description": "file for test",
         },
     )
     assert resp.status_code == 200

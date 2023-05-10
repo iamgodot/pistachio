@@ -260,14 +260,22 @@ def update_user(user_id):
 
 
 @bp.post("/posts")
+@authenticate
 def create_post():
+    # NOTE: without this log line, I kept getting err_connection_reset, which according
+    # to the doc means 413 response when dev serving.
+    LOGGER.debug(request.files.getlist("file"))
     try:
-        payload = request.get_json()
+        user_id = request.form.get("user_id")
+        file = request.files.getlist("file")[0]
+        LOGGER.debug("File name: %s", file.name)
+        description = request.form.getlist("description")[0]
         post = Post(
-            user_id=payload["user_id"],
-            filename=payload["filename"],
+            user_id=user_id,
+            # file.name => 'file' as request.files[0]
+            filename=file.filename,
             download_url="",
-            description=payload["description"],
+            description=description,
         )
         db.session.add(post)
         db.session.commit()
@@ -282,6 +290,7 @@ def create_post():
 
 
 @bp.get("/posts")
+@authenticate
 def get_posts():
     posts = db.session.execute(db.select(Post)).scalars()
     return [
