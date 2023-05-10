@@ -1,11 +1,13 @@
 from datetime import datetime, timedelta, timezone
+from functools import wraps
 from hashlib import md5
+from logging import getLogger
 from os import environ
 from uuid import uuid4
 
 import jwt
 import requests
-from flask import Blueprint, Flask, request
+from flask import Blueprint, Flask, g, request
 from flask_sqlalchemy import SQLAlchemy
 
 from .config import Config
@@ -13,10 +15,12 @@ from .config import Config
 app = Flask(__name__)
 app.config.from_object(Config)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////tmp/prod.db"
+# app.config["MAX_CONTENT_LENGTH"] = 16 * 1000 * 1000
 
 db = SQLAlchemy()
 db.init_app(app)
 bp = Blueprint("core", __name__)
+LOGGER = getLogger(__name__)
 
 
 class User(db.Model):
@@ -97,6 +101,10 @@ def generate_user_token(sub, jti=None, exp=None, refresh=False):
     return encode_token({"sub": sub, "jti": jti, "exp": exp, "refresh": refresh})
 
 
+def decode_token(token, algorithm="HS256"):
+    return jwt.decode(token, app.config["JWT_SECRET"], algorithms=[algorithm])
+
+
 def get_gh_access_token(code):
     resp = requests.post(
         "https://github.com/login/oauth/access_token",
@@ -104,6 +112,9 @@ def get_gh_access_token(code):
             "client_id": app.config["GITHUB_CLIENT_ID"],
             "client_secret": app.config["GITHUB_CLIENT_SECRET"],
             "code": code,
+        },
+        headers={
+            "Accept": "application/json",
         },
     )
     return resp.json()["access_token"]
@@ -113,10 +124,10 @@ def get_gh_user_info(token):
     return requests.get(
         "https://api.github.com/user",
         headers={
-            "Accept": "application/vnd.github+json",
+            "Accept": "application/json",
             "Authorization": f"Bearer {token}",
         },
-    )
+    ).json()
 
 
 @bp.post("/login")
@@ -135,14 +146,18 @@ def login():
         if payload.get("type") == "github":
             try:
                 gh_token = get_gh_access_token(payload["github_code"])
+                LOGGER.debug("GitHub token: %s", gh_token)
                 gh_user_info = get_gh_user_info(gh_token)
                 gh_username = gh_user_info["login"]
+                LOGGER.debug("GitHub username: %s", gh_username)
                 if not (
                     user := db.session.execute(
                         db.select(User).filter_by(name=gh_username)
                     ).scalar()
                 ):
                     user = User(name=gh_username)
+                    db.session.add(user)
+                    db.session.commit()
             except requests.HTTPError:
                 return {"error": "Failed to authorize by GitHub"}, 400
         else:
@@ -156,6 +171,52 @@ def login():
         return {
             "access_token": generate_user_token(user.id),
             "refresh_token": generate_user_token(user.id, refresh=True),
+        }
+    except Exception as e:
+        return {"error": str(e)}, 400
+
+
+def authenticate(view_func):
+    """Verify JWT access token.
+
+    If valid user found, the object will be saved in global context.
+
+    Raises:
+        InvalidTokenError if token cannot be verified or no valid user found.
+    """
+
+    @wraps(view_func)
+    def decorator(*args, **kwargs):
+        try:
+            token_type, token = request.headers.get("Authorization", "").split(
+                maxsplit=1
+            )
+            assert token_type == "Bearer"
+            user_id = decode_token(token)["sub"]
+        except (KeyError, ValueError, AssertionError):
+            return {"error": "Bearer token is required."}, 400
+        # user = get_user_from_token(token, Repository(db.session))
+        user = db.session.execute(db.select(User).filter_by(id=user_id)).scalar()
+        if not user:
+            LOGGER.warning("Request with invalid token: %s", token)
+            return {"error": "No valid token found."}, 401
+        g.current_user = user
+        g.token = token
+        return view_func(*args, **kwargs)
+
+    return decorator
+
+
+@bp.get("/user")
+@authenticate
+def get_current_user():
+    try:
+        user = g.current_user
+        return {
+            "id": user.id,
+            "name": user.name,
+            "nickname": user.nickname,
+            "description": user.description,
         }
     except Exception as e:
         return {"error": str(e)}, 400

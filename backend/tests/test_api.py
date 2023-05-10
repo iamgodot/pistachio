@@ -43,6 +43,20 @@ def test_login_by_github(client, mocker):
 
 
 @pytest.mark.usefixtures("db")
+def test_get_current_user(client):
+    register(client)
+    resp = client.post(
+        BASE_URL + "/login", json={"username": "foo", "password": "secret"}
+    )
+    access_token = resp.json["access_token"]
+    resp = client.get(
+        BASE_URL + "/user", headers={"Authorization": f"Bearer {access_token}"}
+    )
+    assert resp.status_code == 200
+    assert resp.json["name"] == "foo"
+
+
+@pytest.mark.usefixtures("db")
 def test_user(client):
     user_id = register(client)
 
