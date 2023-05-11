@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 from functools import wraps
 from hashlib import md5
 from logging import getLogger
-from os import environ
+from os import getenv
 from uuid import uuid4
 
 import jwt
@@ -16,6 +16,10 @@ app = Flask(__name__)
 app.config.from_object(Config)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////tmp/prod.db"
 # app.config["MAX_CONTENT_LENGTH"] = 16 * 1000 * 1000
+if env_file := (getenv("PISTACHIO_ENV") or ".env"):
+    from dotenv import dotenv_values
+
+    app.config.from_mapping(dotenv_values(env_file))
 
 db = SQLAlchemy()
 db.init_app(app)
@@ -44,7 +48,7 @@ class Post(db.Model):
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
 
-if not environ.get("TEST", None):
+if not getenv("TEST"):
     with app.app_context():
         db.create_all()
 
