@@ -27,7 +27,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - run: pip install pdm && pdm install -p backend
-      - run: make test
+      - run: cd backend && make test
   build:
     name: Build
     needs: test
