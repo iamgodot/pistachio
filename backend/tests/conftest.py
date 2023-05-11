@@ -1,7 +1,7 @@
 import pytest
 
 
-@pytest.fixture()
+@pytest.fixture
 def app():
     from os import environ
 
@@ -12,7 +12,7 @@ def app():
     yield app
 
 
-@pytest.fixture()
+@pytest.fixture
 def db(app):
     from pistachio.app import db
 
@@ -22,6 +22,6 @@ def db(app):
         db.drop_all()
 
 
-@pytest.fixture()
+@pytest.fixture
 def client(app):
     return app.test_client()
