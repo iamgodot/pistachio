@@ -48,7 +48,7 @@ const Login = () => {
         />
         <div className="absolute flex flex-col justify-center items-center top-0 right-0 left-0 bottom-0">
           <div className="m-8 font-mono text-xl text-gray-900 ">
-            Welcome to Pistachio
+            Welcome to Pistachio!
           </div>
           <button
             type="button"
