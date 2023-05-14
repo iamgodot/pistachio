@@ -5,6 +5,7 @@ import logo from "../assets/logowhite.png";
 import axios from "axios";
 
 const CLIENT_ID = "35ed38dbee5282f1b162";
+const API_BASE = process.env.REACT_APP_BACKEND_URL;
 
 const Login = () => {
   const navigate = useNavigate();
@@ -18,7 +19,10 @@ const Login = () => {
     const codeParam = urlParams.get("code");
     if (codeParam) {
       axios
-        .post("/v1/login", { type: "github", github_code: codeParam })
+        .post(API_BASE + "/v1/login", {
+          type: "github",
+          github_code: codeParam,
+        })
         .then((response) => {
           const data = response.data;
           if (data && data.access_token) {
