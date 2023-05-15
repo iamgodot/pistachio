@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import shareVideo from "../assets/share.mp4";
-import logo from "../assets/logowhite.png";
 import axios from "axios";
 
 const CLIENT_ID = "35ed38dbee5282f1b162";
@@ -18,7 +17,7 @@ const Login = () => {
     const codeParam = urlParams.get("code");
     if (codeParam) {
       axios
-        .post("/v1/login", { type: "github", github_code: codeParam })
+        .post("/api/v1/login", { type: "github", github_code: codeParam })
         .then((response) => {
           const data = response.data;
           if (data && data.access_token) {

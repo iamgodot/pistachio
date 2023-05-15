@@ -17,7 +17,7 @@ const Home = () => {
       navigate("/login");
     }
     axios
-      .get("/v1/user", { headers })
+      .get("/api/v1/user", { headers })
       .then((response) => {
         setUser(response.data);
       })
@@ -26,7 +26,7 @@ const Home = () => {
       });
 
     axios
-      .get("/v1/posts", { headers })
+      .get("/api/v1/posts", { headers })
       .then((response) => {
         setPosts(response.data);
       })
