@@ -15,6 +15,7 @@ const Home = () => {
   useEffect(() => {
     if (!accessToken) {
       navigate("/login");
+      return;
     }
     axios
       .get("/api/v1/user", { headers })
