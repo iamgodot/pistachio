@@ -48,7 +48,7 @@ const Home = () => {
     data.append("description", description);
     data.append("user_id", user.id);
     axios
-      .post("/v1/posts", data, {
+      .post("/api/v1/posts", data, {
         headers: { ...headers, "Content-Type": "multipart/form-data" },
         onUploadProgress: (ProgressEvent) => {
           const progress = (ProgressEvent.loaded / ProgressEvent.total) * 100;
