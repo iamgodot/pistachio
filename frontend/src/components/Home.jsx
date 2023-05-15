@@ -3,8 +3,6 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import PdfView from "./PdfView";
 
-const API_BASE = process.env.REACT_APP_BACKEND_URL;
-
 const Home = () => {
   const accessToken = localStorage.getItem("accessToken");
   const navigate = useNavigate();
@@ -19,7 +17,7 @@ const Home = () => {
       navigate("/login");
     }
     axios
-      .get(API_BASE + "/v1/user", { headers })
+      .get("/v1/user", { headers })
       .then((response) => {
         setUser(response.data);
       })
@@ -28,7 +26,7 @@ const Home = () => {
       });
 
     axios
-      .get(API_BASE + "/v1/posts", { headers })
+      .get("/v1/posts", { headers })
       .then((response) => {
         setPosts(response.data);
       })
@@ -50,7 +48,7 @@ const Home = () => {
     data.append("description", description);
     data.append("user_id", user.id);
     axios
-      .post(API_BASE + "/v1/posts", data, {
+      .post("/v1/posts", data, {
         headers: { ...headers, "Content-Type": "multipart/form-data" },
         onUploadProgress: (ProgressEvent) => {
           const progress = (ProgressEvent.loaded / ProgressEvent.total) * 100;
