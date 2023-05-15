@@ -20,6 +20,9 @@ spec:
         - name: pistachio-backend
           image: ghcr.io/iamgodot/pistachio:latest
           imagePullPolicy: IfNotPresent
+          envFrom:
+            - secretRef:
+                name: pistachio-backend
           ports:
             - containerPort: 9527
       imagePullSecrets:

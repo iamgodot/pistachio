@@ -11,6 +11,8 @@ dependencies = [
     "gunicorn>=20.1.0",
     "python-dotenv>=1.0.0",
     "gevent>=22.10.2",
+    "pyjwt>=2.6.0",
+    "requests>=2.29.0",
 ]
 requires-python = ">=3.8"
 license = {text = "MIT"}
@@ -21,4 +23,5 @@ extraPaths = ["__pypackages__/3.11/lib/"]
 [tool.pdm.dev-dependencies]
 dev = [
     "pytest>=7.3.1",
+    "pytest-mock>=3.10.0",
 ]
