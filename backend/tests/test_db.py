@@ -1,4 +1,4 @@
-from pistachio.app import User, Post
+from pistachio.models import Post, User
 
 
 def test_create(db):
