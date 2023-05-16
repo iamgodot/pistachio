@@ -1,27 +1,38 @@
+import logging
+
 import pytest
 
+from pistachio import create_app
+from pistachio.extensions import db as _db
 
-@pytest.fixture
+# @pytest.fixture(scope="session", autouse=True)
+# def setup_logging():
+#     root_logger = logging.getLogger("")
+#     root_logger.setLevel(logging.DEBUG)
+#     stream_handler = logging.StreamHandler()
+#     stream_handler.setLevel(logging.DEBUG)
+#     root_logger.addHandler(stream_handler)
+#
+#     yield
+#
+#     root_logger.removeHandler(stream_handler)
+
+
+@pytest.fixture(scope="session")
 def app():
-    from os import environ
-
-    environ["TEST"] = "1"
-    from pistachio.app import app
-
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////tmp/test.db"
-    yield app
+    _app = create_app(testing=True)
+    with _app.app_context():
+        yield _app
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def db(app):
-    from pistachio.app import db
-
-    with app.app_context():
-        db.create_all()
-        yield db
-        db.drop_all()
+    _db.create_all()
+    yield _db
+    _db.session.close()
+    _db.drop_all()
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def client(app):
     return app.test_client()

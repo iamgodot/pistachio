@@ -25,3 +25,7 @@ dev = [
     "pytest>=7.3.1",
     "pytest-mock>=3.10.0",
 ]
+
+[tool.pytest.ini_options]
+log_cli = true
+log_level = 10

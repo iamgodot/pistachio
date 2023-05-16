@@ -39,8 +39,10 @@ def test_login(client, register):
 
 @pytest.mark.usefixtures("db")
 def test_login_by_github(client, mocker):
-    mocker.patch("pistachio.app.get_gh_access_token")
-    mocker.patch("pistachio.app.get_gh_user_info", return_value={"login": "foo"})
+    mocker.patch("pistachio.entrypoints.auth.get_gh_access_token")
+    mocker.patch(
+        "pistachio.entrypoints.auth.get_gh_user_info", return_value={"login": "foo"}
+    )
     resp = client.post(
         BASE_URL + "/login", json={"type": "github", "github_code": "foo"}
     )
