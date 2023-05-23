@@ -23,10 +23,15 @@ def create_app(testing=False):
                 "default": {
                     "class": "logging.StreamHandler",
                     "formatter": "default",
-                    "level": "DEBUG",
                 }
             },
-            "pistachio": {"level": "DEBUG", "handlers": ["default"], "propagate": True},
+            "loggers": {
+                "pistachio": {
+                    "level": "WARNING",
+                    "handlers": ["default"],
+                    "propagate": False,
+                },
+            },
         }
     )
     app = Flask("pistachio")
