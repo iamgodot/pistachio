@@ -1,4 +1,4 @@
-name: test
+name: Deploy
 on:
   push:
     branches:
@@ -6,31 +6,11 @@ on:
     paths-ignore:
       - 'frontend/**'
       - 'infra/**'
-      - '*.md'
-  pull_request:
-    branches:
-      - main
-    paths-ignore:
-      - 'frontend/**'
-      - 'infra/**'
+      - 'docs/**'
       - '*.md'
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.11]
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-      - run: pip install pdm && pdm install -p backend
-      - run: cd backend && make test
   build:
     name: Build
-    needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Set up Docker Buildx
@@ -55,7 +35,7 @@ jobs:
           cache-to: type=gha,mode=max
   deploy:
     name: Deploy
-    needs: [test, build]
+    needs: ['build']
     runs-on: ubuntu-latest
     steps:
       - name: Set the Kubernetes context

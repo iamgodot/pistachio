@@ -4,7 +4,7 @@ A file-oriented sharing platform.
 
 ## Architecture
 
-![](./assets/arch.png)
+![](./docs/arch.png)
 
 When user opens `(www.)pistachio.win`, request will be directed to the frontend app on Vercel after DNS resolution by Cloudflare.
 
