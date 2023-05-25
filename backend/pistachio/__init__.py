@@ -11,29 +11,28 @@ def create_app():
     """
     from logging.config import dictConfig
 
-    dictConfig(
-        {
-            "version": 1,
-            "formatters": {
-                "default": {
-                    "format": "[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
-                }
+    logging_config = {
+        "version": 1,
+        "formatters": {
+            "default": {
+                "format": "[%(asctime)s] %(levelname)s in func `%(funcName)s` by logger `%(name)s`: %(message)s",  # NOQA
+            }
+        },
+        "handlers": {
+            "default": {
+                "class": "logging.StreamHandler",
+                "formatter": "default",
+            }
+        },
+        "loggers": {
+            "pistachio": {
+                "level": "WARNING",
+                "handlers": ["default"],
+                "propagate": False,
             },
-            "handlers": {
-                "default": {
-                    "class": "logging.StreamHandler",
-                    "formatter": "default",
-                }
-            },
-            "loggers": {
-                "pistachio": {
-                    "level": "WARNING",
-                    "handlers": ["default"],
-                    "propagate": False,
-                },
-            },
-        }
-    )
+        },
+    }
+
     app = Flask("pistachio")
 
     from os import getenv
@@ -47,6 +46,9 @@ def create_app():
         exit(1)
     else:
         print(f"Using {settings_cls} from PISTACHIO_SETTINGS.")
+        if settings_cls != "ProdSettings":
+            logging_config["loggers"]["pistachio"]["level"] = "DEBUG"
+        dictConfig(logging_config)
         app.config.from_object(getattr(settings, settings_cls)())
 
     configure_extensions(app)
