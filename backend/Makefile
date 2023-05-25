@@ -5,7 +5,7 @@ test: ## Run pytest
 	pdm run pytest tests -sv
 
 run:
-	pdm run flask --app pistachio.app run --debug -h localhost -p 5000
+	PISTACHIO_SETTINGS=LocalSettings pdm run flask --app pistachio run --debug -h localhost -p 5000
 
 build-docker-image: ## Build docker image for backend app
 	docker build -t iamgodot/pistachio:latest .

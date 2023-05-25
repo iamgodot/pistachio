@@ -1,13 +1,13 @@
-from pydantic import BaseSettings
+from pydantic import BaseSettings, Field
 
 
 class Settings(BaseSettings):
-    SECRET_KEY: str = ""
+    SECRET_KEY: str = Field(default="pistachio", env="PISTACHIO_SECRET_KEY")
 
     SQLALCHEMY_DATABASE_URI: str = "sqlite:////tmp/pistachio.sqlite"
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
 
-    JWT_SECRET: str = "development"
+    JWT_SECRET: str = ""
     ACCESS_TOKEN_TTL: int = 60 * 10  # 10 mins
     REFRESH_TOKEN_TTL: int = 60 * 60 * 24 * 7  # 1 week
 
@@ -29,3 +29,12 @@ class Settings(BaseSettings):
 class TestSettings(Settings):
     TESTING: bool = True
     SQLALCHEMY_DATABASE_URI: str = "sqlite:///:memory:"
+
+
+class LocalSettings(Settings):
+    DEBUG: bool = True
+    JWT_SECRET: str = "development"
+
+
+class ProdSettings(Settings):
+    pass
