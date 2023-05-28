@@ -27,6 +27,9 @@ dev = [
     "pytest-mock>=3.10.0",
 ]
 
+[tool.setuptools]
+packages = ["pistachio"]
+
 [tool.pytest.ini_options]
 log_cli = true
 log_level = 10
