@@ -1,7 +1,9 @@
 from flask import Flask
 
+from pistachio.adapters.orm import metadata, start_mappers
 from pistachio.entrypoints import auth, post
-from pistachio.extensions import db
+from pistachio.extensions import engine
+from pistachio.settings import settings
 
 
 def create_app():
@@ -9,47 +11,10 @@ def create_app():
 
     When use flask shell, .env&.flaskenv will be autoloaded if dotenv installed.
     """
-    from logging.config import dictConfig
-
-    logging_config = {
-        "version": 1,
-        "formatters": {
-            "default": {
-                "format": "[%(asctime)s] %(levelname)s in func `%(funcName)s` by logger `%(name)s`: %(message)s",  # NOQA
-            }
-        },
-        "handlers": {
-            "default": {
-                "class": "logging.StreamHandler",
-                "formatter": "default",
-            }
-        },
-        "loggers": {
-            "pistachio": {
-                "level": "WARNING",
-                "handlers": ["default"],
-                "propagate": False,
-            },
-        },
-    }
 
     app = Flask("pistachio")
 
-    from os import getenv
-
-    from pistachio import settings
-
-    if not (settings_cls := getenv("PISTACHIO_SETTINGS")):
-        print("Env `PISTACHIO_SETTINGS` is not set, exit now.")
-        from sys import exit
-
-        exit(1)
-    else:
-        print(f"Using {settings_cls} from PISTACHIO_SETTINGS.")
-        if settings_cls != "ProdSettings":
-            logging_config["loggers"]["pistachio"]["level"] = "DEBUG"
-        dictConfig(logging_config)
-        app.config.from_object(getattr(settings, settings_cls)())
+    app.config.from_object(settings)
 
     configure_extensions(app)
     configure_blueprints(app)
@@ -59,9 +24,8 @@ def create_app():
 
 
 def configure_extensions(app):
-    db.init_app(app)
-    with app.app_context():
-        db.create_all()
+    start_mappers()
+    metadata.create_all(engine)
 
 
 def configure_blueprints(app):
