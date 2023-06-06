@@ -2,7 +2,7 @@ help: ## Prints help for targets with comments
 	@cat $(MAKEFILE_LIST) | grep -E '^[a-zA-Z_-]+:.*?## .*$$' | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 test: ## Run pytest
-	pdm run pytest tests -sv
+	PISTACHIO_SETTINGS=TestSettings pdm run pytest tests -sv
 
 run:
 	PISTACHIO_SETTINGS=LocalSettings pdm run flask --app pistachio run --debug -h localhost -p 5000

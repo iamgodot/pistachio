@@ -1,25 +1,32 @@
 import pytest
 
 from pistachio import create_app
-from pistachio.extensions import db as _db
+from pistachio.adapters.orm import metadata
+from pistachio.extensions import engine
+from pistachio.services.session_manager import DEFAULT_SESSION_FACTORY
 
 
 @pytest.fixture(scope="session")
 def app():
-    from os import environ
-
-    environ["PISTACHIO_SETTINGS"] = "TestSettings"
     _app = create_app()
-    with _app.app_context():
-        yield _app
+    yield _app
+    metadata.drop_all(bind=engine)
 
 
-@pytest.fixture(scope="function")
-def db(app):
-    _db.create_all()
-    yield _db
-    _db.session.close()
-    _db.drop_all()
+@pytest.fixture(scope="session")
+def session_factory(app):
+    return DEFAULT_SESSION_FACTORY
+
+
+@pytest.fixture
+def session(session_factory):
+    connection = engine.connect()
+    trans = connection.begin()
+    session = session_factory(bind=connection, join_transaction_mode="create_savepoint")
+    yield session
+    session.close()
+    trans.rollback()
+    connection.close()
 
 
 @pytest.fixture(scope="session")

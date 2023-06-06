@@ -17,10 +17,18 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      MYSQL_DATABASE: pistachio
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
     strategy:
       matrix:
         python-version: [3.11]
     steps:
+      - name: Set up MySQL
+        run: |
+          sudo /etc/init.d/mysql start
+          mysql -e 'CREATE DATABASE ${{ env.MYSQL_DATABASE }};' -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }}
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
@@ -28,3 +36,5 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - run: pip install pdm && pdm install
       - run: make test
+        env:
+          SQLALCHEMY_DATABASE_URI: mysql+mysqldb://root:root@localhost/pistachio

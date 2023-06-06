@@ -1,3 +1,5 @@
-from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import create_engine
 
-db = SQLAlchemy()
+from pistachio.settings import settings
+
+engine = create_engine(settings.SQLALCHEMY_DATABASE_URI)
