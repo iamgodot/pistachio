@@ -4,7 +4,8 @@ from pydantic import BaseSettings, Field
 class Settings(BaseSettings):
     SECRET_KEY: str = Field(default="pistachio", env="PISTACHIO_SECRET_KEY")
 
-    SQLALCHEMY_DATABASE_URI: str = "sqlite:////tmp/pistachio.sqlite"
+    # TODO: dsn builder
+    SQLALCHEMY_DATABASE_URI: str = "mysql+mysqldb://root:root@localhost/pistachio"
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
 
     JWT_SECRET: str = ""
