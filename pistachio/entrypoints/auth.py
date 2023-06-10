@@ -60,8 +60,9 @@ def login():
             return {"error": str(e)}, 400
         # FIXME: gh username may conflict with existed user
         # Remove register logic here thus require another api call
+        # NOTE: email might be None if one sets email address to private
         user = register_user(
-            gh_user_info["login"], gh_user_info["email"], "", session_manager
+            gh_user_info["login"], gh_user_info["email"] or "", "", session_manager
         )
     else:
         if not payload.get("username") or not payload.get("password"):
