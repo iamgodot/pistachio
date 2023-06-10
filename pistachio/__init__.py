@@ -33,8 +33,8 @@ def configure_blueprints(app):
     def index():
         return "<html><h2>Welcome to Pistachio</h2></html>"
 
-    app.register_blueprint(auth.bp, url_prefix="/v1")
-    app.register_blueprint(post.bp, url_prefix="/v1")
+    app.register_blueprint(auth.bp, url_prefix="/api/v1")
+    app.register_blueprint(post.bp, url_prefix="/api/v1")
 
 
 def configure_cli():
