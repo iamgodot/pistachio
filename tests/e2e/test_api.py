@@ -1,4 +1,4 @@
-BASE_URL = "/v1"
+BASE_URL = "/api/v1"
 
 
 def login(client, credential: dict):
