@@ -1,15 +1,15 @@
 from dataclasses import dataclass, field
 
-from pistachio.utils import hash_password
+from pistachio.utils import generate_alnum, hash_password
 
 
 @dataclass
 class User:
     id: int = field(init=False, default=0)
-    username: str
-    email: str
-    nickname: str
+    email: str = ""
     password: str = ""
+    username: str = ""
+    nickname: str = ""
     avatar: str = "https://i.pravatar.cc/150?img=2"
     bio: str = ""
     followings: list = field(default_factory=list)
@@ -18,6 +18,8 @@ class User:
 
     def __post_init__(self):
         self.password_hash = hash_password(self.password)
+        if not self.username:
+            self.username = generate_alnum(20)
 
 
 @dataclass
