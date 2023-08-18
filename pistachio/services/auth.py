@@ -3,9 +3,10 @@ from datetime import datetime, timedelta, timezone
 from logging import getLogger
 from uuid import uuid4
 
-import jwt
 import requests
 from flask import current_app
+from jwt import decode, encode
+from jwt.exceptions import PyJWTError
 from sqlalchemy.exc import MultipleResultsFound, NoResultFound
 
 from pistachio.models import User
@@ -16,7 +17,7 @@ LOGGER = getLogger(__name__)
 
 
 def encode_token(payload, algorithm="HS256", headers=None):
-    return jwt.encode(
+    return encode(
         payload, current_app.config["JWT_SECRET"], algorithm=algorithm, headers=headers
     )
 
@@ -43,11 +44,9 @@ def generate_user_token(sub, jti=None, exp=None, refresh=False):
 
 def decode_token(token, algorithm="HS256"):
     try:
-        return jwt.decode(
-            token, current_app.config["JWT_SECRET"], algorithms=[algorithm]
-        )
-    except jwt.exceptions.ExpiredSignatureError:
-        raise TokenDecodeException()
+        return decode(token, current_app.config["JWT_SECRET"], algorithms=[algorithm])
+    except PyJWTError as e:
+        raise TokenDecodeException(str(e))
 
 
 class TokenDecodeException(Exception):
