@@ -42,7 +42,16 @@ def generate_user_token(sub, jti=None, exp=None, refresh=False):
 
 
 def decode_token(token, algorithm="HS256"):
-    return jwt.decode(token, current_app.config["JWT_SECRET"], algorithms=[algorithm])
+    try:
+        return jwt.decode(
+            token, current_app.config["JWT_SECRET"], algorithms=[algorithm]
+        )
+    except jwt.exceptions.ExpiredSignatureError:
+        raise TokenDecodeException()
+
+
+class TokenDecodeException(Exception):
+    pass
 
 
 def get_gh_access_token(code):

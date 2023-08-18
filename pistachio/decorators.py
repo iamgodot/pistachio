@@ -3,7 +3,7 @@ from logging import getLogger
 
 from flask import request
 
-from pistachio.services.auth import decode_token
+from pistachio.services.auth import TokenDecodeException, decode_token
 
 LOGGER = getLogger(__name__)
 
@@ -25,7 +25,7 @@ def authenticate(view_func):
             )
             assert token_type == "Bearer"
             user_id = decode_token(token)["sub"]
-        except (KeyError, ValueError, AssertionError):
+        except (KeyError, ValueError, AssertionError, TokenDecodeException):
             return {"error": "Bearer token is required."}, 400
         # user = get_user_from_token(token, Repository(db.session))
         # user = db.session.execute(db.select(User).filter_by(id=user_id)).scalar()
