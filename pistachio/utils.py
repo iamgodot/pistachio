@@ -1,3 +1,6 @@
+from random import choice
+from string import ascii_letters, digits
+
 from passlib.hash import bcrypt
 
 
@@ -8,6 +11,11 @@ def hash_password(password: str) -> str:
 
 def verify_password(password: str, hashed: str) -> bool:
     return bcrypt.verify(password, hashed)
+
+
+def generate_alnum(k: int):
+    """Generate an alpha-numeric string of length k."""
+    return "".join(choice(ascii_letters + digits) for _ in range(k))
 
 
 if __name__ == "__main__":

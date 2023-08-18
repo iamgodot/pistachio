@@ -89,7 +89,7 @@ def sm():
 @pytest.fixture
 def create_user(sm):
     with sm:
-        sm.query.add(User("foo", "", "", "testpass"))
+        sm.query.add(User(username="foo", email="", nickname="", password="testpass"))
         sm.commit()
 
 

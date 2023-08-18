@@ -1,6 +1,15 @@
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, MetaData, String, Table
+from sqlalchemy import (
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    MetaData,
+    String,
+    Table,
+    Text,
+)
 from sqlalchemy.orm import registry, relationship
 
 from pistachio.models import Attachment, Post, User
@@ -14,11 +23,10 @@ user = Table(
     # TODO: index
     Column("username", String(20), nullable=False),
     Column("password_hash", String(60), nullable=False),
-    Column("nickname", String(20), nullable=False),
-    Column("email", String(30), nullable=False),
-    # Column("status", String(30)),
-    Column("avatar", String(50), nullable=False),
-    Column("bio", String(100), default=""),
+    Column("nickname", String(50), nullable=False),
+    Column("email", String(50), nullable=False),
+    Column("avatar", String(100), nullable=False),
+    Column("bio", Text, default=""),
     Column("created_at", DateTime, nullable=False, default=datetime.now),
 )
 
@@ -34,7 +42,7 @@ post = Table(
     "post",
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
-    Column("description", String(100), nullable=False, default=""),
+    Column("description", Text, nullable=False, default=""),
     Column("created_at", DateTime, nullable=False, default=datetime.now),
     Column("updated_at", DateTime, nullable=False, default=datetime.now),
     Column("user_id", ForeignKey("user.id")),
@@ -44,9 +52,9 @@ attachment = Table(
     "attachment",
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
-    Column("name", String(30), nullable=False),
+    Column("name", String(50), nullable=False),
     Column("size", Integer, nullable=False, comment="Byte as unit"),
-    Column("url", String(50), nullable=False),
+    Column("url", String(100), nullable=False),
     Column("post_id", ForeignKey("post.id")),
 )
 
