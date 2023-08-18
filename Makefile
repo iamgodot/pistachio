@@ -4,11 +4,14 @@ help: ## Prints help for targets with comments
 test: ## Run pytest
 	PISTACHIO_SETTINGS=TestSettings pdm run pytest tests -sv
 
-run:
-	PISTACHIO_SETTINGS=LocalSettings pdm run flask --app pistachio run --debug -h localhost -p 5000
+run: ## Run local server
+	pdm run flask --app pistachio run --debug -h 0.0.0.0 -p 9527
 
-build-docker-image: ## Build docker image for backend app
-	docker build -t iamgodot/pistachio:latest .
+build-image: ## Build docker image for amd64
+	docker buildx build --platform linux/amd64 -f Dockerfile -t iamgodot/pistachio .
+
+push-image: ## Push docker image for amd64
+	docker push iamgodot/pistachio
 
 build-gh-image: ## Build github image for backend app
 	docker build -t ghcr.io/iamgodot/pistachio:latest .

@@ -7,3 +7,4 @@ __pypackages__
 *.egg-info
 .coverage
 .tox
+.env
