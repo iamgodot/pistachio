@@ -30,7 +30,7 @@ bp = Blueprint("auth", __name__)
 
 
 class RegisterPayloadSchema(ma.Schema):
-    username = Str()
+    nickname = Str()
     email = Str(required=True)
     password = Str(required=True)
 
