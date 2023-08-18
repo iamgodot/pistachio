@@ -11,7 +11,7 @@ def test_user(client, mocker):
     resp = client.post(
         BASE_URL + "/register",
         json={
-            "username": "foo",
+            "nickname": "foo",
             "email": "foo@example.com",
             "password": "secret",
         },
@@ -45,7 +45,7 @@ def test_user(client, mocker):
     )
     # NOTE: this is our second user with id=2
     resp = client.post(
-        BASE_URL + "/login", json={"type": "github", "github_code": "foo"}
+        BASE_URL + "/login", json={"type": "github", "github_code": "123"}
     )
     assert resp.status_code == 200
     assert "access_token" in resp.json
@@ -56,7 +56,7 @@ def test_user(client, mocker):
         BASE_URL + "/user", headers={"Authorization": f"Bearer {access_token}"}
     )
     assert resp.status_code == 200
-    assert resp.json["username"] == "foo"
+    assert resp.json["nickname"] == "foo"
 
     # ---------- Update current user ----------
 
@@ -66,7 +66,7 @@ def test_user(client, mocker):
         headers={"Authorization": f"Bearer {access_token}"},
     )
     assert resp.status_code == 200
-    assert resp.json["id"] == 1
+    assert resp.json["nickname"] == "bar"
 
     # ---------- Get user ----------
 
@@ -76,7 +76,7 @@ def test_user(client, mocker):
         headers={"Authorization": f"Bearer {access_token}"},
     )
     assert resp.status_code == 200
-    assert resp.json["username"] == "foo"
+    assert resp.json["nickname"] == "bar"
 
     # ---------- Delete user ----------
 
