@@ -168,8 +168,9 @@ def login_user_via_github(code) -> dict:
         LOGGER.debug("GitHub token: %s", gh_token)
         gh_user_info = get_gh_user_info(gh_token)
         LOGGER.debug("GitHub userinfo: %s", gh_user_info)
+        assert "login" in gh_user_info
         return gh_user_info
-    except requests.HTTPError:
+    except (requests.HTTPError, AssertionError, KeyError):
         raise AuthorizationFailed("Failed to authorize by GitHub")
 
 
