@@ -95,22 +95,37 @@ class AuthorizationFailed(Exception):
     pass
 
 
-def register_user(username, email, password, sm: SessionManagerBase) -> dict:
-    user = User(username=username, email=email, nickname=username, password=password)
+def register_user(email, password, sm: SessionManagerBase, **other_info) -> dict:
+    user = User(email=email, password=password, **other_info)
     with sm:
-        if sm.query.first(User, username=username) is not None:
-            raise UsernameTaken(f"User {username} already exists")
+        if sm.query.first(User, email=email) is not None:
+            raise UsernameTaken(f"User already exists: {email}")
         sm.query.add(user)
         sm.commit()
         return asdict(user)
 
 
-def login_user(username, password, sm: SessionManagerBase) -> dict:
+def login_user(email, password, sm: SessionManagerBase) -> dict:
+    with sm:
+        if not (user := sm.query.first(User, email=email)):
+            raise UserNotFound(f"User not found: {email}")
+        if verify_password(password, user.password_hash) is False:
+            raise InvalidCredential(f"Wrong password for user: {email}")
+        return asdict(user)
+
+
+def register_github_user(username, sm: SessionManagerBase, **other_info) -> dict:
+    """If username does not exist, register user with github as email."""
     with sm:
         if not (user := sm.query.first(User, username=username)):
-            raise UserNotFound(f"User {username} not found")
-        if verify_password(password, user.password_hash) is False:
-            raise InvalidCredential(f"Wrong password for user {username}")
+            user = User(
+                email=f"{username}@github.com",
+                username=username,
+                nickname=username,
+                **other_info,
+            )
+            sm.query.add(user)
+            sm.commit()
         return asdict(user)
 
 

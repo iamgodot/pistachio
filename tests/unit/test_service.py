@@ -89,27 +89,34 @@ def sm():
 @pytest.fixture
 def create_user(sm):
     with sm:
-        sm.query.add(User(username="foo", email="", nickname="", password="testpass"))
+        sm.query.add(
+            User(
+                email="foo@example.com",
+                password="testpass",
+                username="",
+                nickname="foo",
+            )
+        )
         sm.commit()
 
 
 def test_register_normal(sm):
     assert sm.committed is False
-    user_dict = register_user("foo", "", "", sm)
+    user_dict = register_user("foo@example.com", "testpass", sm, nickname="foo")
     assert sm.committed is True
-    assert user_dict["username"] == "foo"
+    assert user_dict["nickname"] == "foo"
 
 
 @pytest.mark.usefixtures("create_user")
 def test_register_fail(sm):
     with pytest.raises(UsernameTaken):
-        register_user("foo", "", "", sm)
+        register_user("foo@example.com", "testpass", sm)
 
 
 @pytest.mark.usefixtures("create_user")
 def test_login_normal(sm):
-    user_dict = login_user("foo", "testpass", sm)
-    assert user_dict["username"] == "foo"
+    user_dict = login_user("foo@example.com", "testpass", sm)
+    assert user_dict["nickname"] == "foo"
 
 
 @pytest.mark.usefixtures("create_user")
@@ -121,7 +128,7 @@ def test_login_user_not_found(sm):
 @pytest.mark.usefixtures("create_user")
 def test_login_with_wrong_password(sm):
     with pytest.raises(InvalidCredential):
-        login_user("foo", "anotherpass", sm)
+        login_user("foo@example.com", "anotherpass", sm)
 
 
 def test_login_user_via_github():

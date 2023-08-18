@@ -26,7 +26,7 @@ def test_user(client, mocker):
     resp = login(client, {})
     assert resp.status_code == 400
 
-    resp = login(client, {"username": "foo", "password": "secret"})
+    resp = login(client, {"email": "foo@example.com", "password": "secret"})
     # NOTE: save token for later
     access_token = resp.json["access_token"]
     assert resp.status_code == 200
@@ -37,14 +37,18 @@ def test_user(client, mocker):
     mocker.patch("pistachio.services.auth.get_gh_access_token")
     mocker.patch(
         "pistachio.services.auth.get_gh_user_info",
-        return_value={"login": "octocat", "email": "octocat@github.com"},
+        return_value={
+            "login": "octocat",
+            "email": "octocat@github.com",
+            "avatar_url": "https://i.pravatar.cc/150?img=2",
+        },
     )
+    # NOTE: this is our second user with id=2
     resp = client.post(
         BASE_URL + "/login", json={"type": "github", "github_code": "foo"}
     )
     assert resp.status_code == 200
     assert "access_token" in resp.json
-    # TODO: register user and use its id for later
 
     # ---------- Get current user ----------
 
@@ -53,6 +57,16 @@ def test_user(client, mocker):
     )
     assert resp.status_code == 200
     assert resp.json["username"] == "foo"
+
+    # ---------- Update current user ----------
+
+    resp = client.patch(
+        BASE_URL + "/user",
+        json={"nickname": "bar"},
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
+    assert resp.status_code == 200
+    assert resp.json["id"] == 1
 
     # ---------- Get user ----------
 
@@ -63,15 +77,8 @@ def test_user(client, mocker):
     )
     assert resp.status_code == 200
     assert resp.json["username"] == "foo"
-    resp = client.patch(
-        BASE_URL + "/users/1",
-        json={"nickname": "bar"},
-        headers={"Authorization": f"Bearer {access_token}"},
-    )
-    assert resp.status_code == 200
-    assert resp.json["id"] == 1
 
-    # ---------- Get current user ----------
+    # ---------- Delete user ----------
 
     # NOTE: keep this order since we need access
     for uid in 2, 1:
