@@ -26,6 +26,11 @@ class Settings(BaseSettings):
 
     MAX_CONTENT_LENGTH: int = 16 * 1000 * 1000
 
+    APIFAIRY_TITLE = "Pistachio API Documentation"
+    APIFAIRY_VERSION = ""
+    APIFAIRY_UI = "redoc"
+    APIFAIRY_UI_PATH = "/api/docs"
+
 
 class TestSettings(Settings):
     TESTING: bool = True

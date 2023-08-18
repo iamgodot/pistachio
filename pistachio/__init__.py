@@ -2,7 +2,7 @@ from flask import Flask
 
 from pistachio.adapters.orm import metadata, start_mappers
 from pistachio.entrypoints import auth, post
-from pistachio.extensions import engine
+from pistachio.extensions import apifairy, engine, ma
 from pistachio.settings import settings
 
 
@@ -26,6 +26,8 @@ def create_app():
 def configure_extensions(app):
     start_mappers()
     metadata.create_all(engine)
+    apifairy.init_app(app)
+    ma.init_app(app)
 
 
 def configure_blueprints(app):

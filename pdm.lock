@@ -2,6 +2,28 @@
 # It is not intended for manual editing.
 
 [[package]]
+name = "apifairy"
+version = "1.3.0"
+requires_python = ">=3.6"
+summary = "A minimalistic API framework built on top of Flask, Marshmallow and friends."
+dependencies = [
+    "apispec>=4",
+    "flask-httpauth>=4",
+    "flask-marshmallow",
+    "flask>=1.1.0",
+    "webargs>=6",
+]
+
+[[package]]
+name = "apispec"
+version = "6.3.0"
+requires_python = ">=3.7"
+summary = "A pluggable API specification generator. Currently supports the OpenAPI Specification (f.k.a. the Swagger specification)."
+dependencies = [
+    "packaging>=21.3",
+]
+
+[[package]]
 name = "bcrypt"
 version = "4.0.1"
 requires_python = ">=3.6"
@@ -59,6 +81,25 @@ dependencies = [
     "click>=8.0",
     "importlib-metadata>=3.6.0; python_version < \"3.10\"",
     "itsdangerous>=2.0",
+]
+
+[[package]]
+name = "flask-httpauth"
+version = "4.8.0"
+summary = "HTTP authentication for Flask routes"
+dependencies = [
+    "flask",
+]
+
+[[package]]
+name = "flask-marshmallow"
+version = "0.15.0"
+requires_python = ">=3.7"
+summary = "Flask + marshmallow for beautiful APIs"
+dependencies = [
+    "Flask",
+    "marshmallow>=3.0.0",
+    "packaging>=17.0",
 ]
 
 [[package]]
@@ -130,6 +171,15 @@ name = "markupsafe"
 version = "2.1.2"
 requires_python = ">=3.7"
 summary = "Safely add untrusted strings to HTML/XML markup."
+
+[[package]]
+name = "marshmallow"
+version = "3.20.1"
+requires_python = ">=3.8"
+summary = "A lightweight library for converting complex datatypes to and from native Python datatypes."
+dependencies = [
+    "packaging>=17.0",
+]
 
 [[package]]
 name = "mysqlclient"
@@ -261,6 +311,16 @@ requires_python = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
 summary = "HTTP library with thread-safe connection pooling, file post, and more."
 
 [[package]]
+name = "webargs"
+version = "8.3.0"
+requires_python = ">=3.7.2"
+summary = "Declarative parsing and validation of HTTP request objects, with built-in support for popular web frameworks, including Flask, Django, Bottle, Tornado, Pyramid, Falcon, and aiohttp."
+dependencies = [
+    "marshmallow>=3.0.0",
+    "packaging",
+]
+
+[[package]]
 name = "werkzeug"
 version = "2.2.3"
 requires_python = ">=3.7"
@@ -296,9 +356,17 @@ dependencies = [
 lock_version = "4.2"
 cross_platform = true
 groups = ["default", "dev"]
-content_hash = "sha256:b7abcb2539cc1164488551c7a456530b511b9bca93ed0d8de8ef159188ce5033"
+content_hash = "sha256:fe50a5854ddb3e20fe99f49cb3002f3cd7ccad18d18c2f9779febea1cd3aab03"
 
 [metadata.files]
+"apifairy 1.3.0" = [
+    {url = "https://files.pythonhosted.org/packages/6a/a5/4af89e1203be80f284ce0569cd05b5e40c425442f4704039139d66b2a9f8/apifairy-1.3.0.tar.gz", hash = "sha256:fbc33511d86c23d69e12496189a1cb05f169c225531756c9ab07ca52e7031d5a"},
+    {url = "https://files.pythonhosted.org/packages/8c/11/c8705b5ea8d2a22e0998241ccb2f4b56962181bbd054a283755b1a7b79ce/apifairy-1.3.0-py3-none-any.whl", hash = "sha256:4f195422c55e923a41b46fa071d5544102f8b55f60f409a0fc4e3c1d9385cbb2"},
+]
+"apispec 6.3.0" = [
+    {url = "https://files.pythonhosted.org/packages/3f/1e/207c3e61c805eef214d7e5c58106312f9af4733b07f470224e4e309dc65e/apispec-6.3.0.tar.gz", hash = "sha256:6cb08d92ce73ff0b3bf46cb2ea5c00d57289b0f279fb0256a3df468182ba5344"},
+    {url = "https://files.pythonhosted.org/packages/8c/fb/5b32dc208c0adadd1b9f08f0982c1a39c0bcc7a0f6206802a0c9086c4756/apispec-6.3.0-py3-none-any.whl", hash = "sha256:95a0b9355785df998bb0e9b939237a30ee4c7428fd6ef97305eae3da06b9b339"},
+]
 "bcrypt 4.0.1" = [
     {url = "https://files.pythonhosted.org/packages/13/68/f3184c1f15581ebd936125b4da04cba0995f97ecd5ee8f4262c8ebba2646/bcrypt-4.0.1-pp39-pypy39_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:705b2cea8a9ed3d55b4491887ceadb0106acf7c6387699fca771af56b1cdeeda"},
     {url = "https://files.pythonhosted.org/packages/28/ed/3c443bfbfdb37cd7c0d055b961311f49049ab4a00f45ba3bfd10d33a9443/bcrypt-4.0.1-pp37-pypy37_pp73-manylinux_2_28_x86_64.whl", hash = "sha256:b3b85202d95dd568efcb35b53936c5e3b3600c7cdcc6115ba461df3a8e89f38d"},
@@ -484,6 +552,14 @@ content_hash = "sha256:b7abcb2539cc1164488551c7a456530b511b9bca93ed0d8de8ef15918
 "flask 2.2.3" = [
     {url = "https://files.pythonhosted.org/packages/95/9c/a3542594ce4973786236a1b7b702b8ca81dbf40ea270f0f96284f0c27348/Flask-2.2.3-py3-none-any.whl", hash = "sha256:c0bec9477df1cb867e5a67c9e1ab758de9cb4a3e52dd70681f59fa40a62b3f2d"},
     {url = "https://files.pythonhosted.org/packages/e8/5c/ff9047989bd995b1098d14b03013f160225db2282925b517bb4a967752ee/Flask-2.2.3.tar.gz", hash = "sha256:7eb373984bf1c770023fce9db164ed0c3353cd0b53f130f4693da0ca756a2e6d"},
+]
+"flask-httpauth 4.8.0" = [
+    {url = "https://files.pythonhosted.org/packages/22/21/0160aa217c4df74e44a04919213f9c8af7e68551c10267b055f1e09d421c/Flask-HTTPAuth-4.8.0.tar.gz", hash = "sha256:66568a05bc73942c65f1e2201ae746295816dc009edd84b482c44c758d75097a"},
+    {url = "https://files.pythonhosted.org/packages/83/c4/e64ace124b927cd1f29270050ee0e0ef5faad75a512c5c8d733961dda9ca/Flask_HTTPAuth-4.8.0-py3-none-any.whl", hash = "sha256:a58fedd09989b9975448eef04806b096a3964a7feeebc0a78831ff55685b62b0"},
+]
+"flask-marshmallow 0.15.0" = [
+    {url = "https://files.pythonhosted.org/packages/1f/2a/eeb3db46209410d4add2c369ad73e3340c314196b08d1895ac972eb38bd7/flask_marshmallow-0.15.0-py2.py3-none-any.whl", hash = "sha256:ce08a153f74da6ebfffd8065d1687508b0179df37fff7fc0c8f28ccfb64f1b56"},
+    {url = "https://files.pythonhosted.org/packages/ac/8b/5c59b930375226c7d1d49b39d00a36696febb6fc1934aa82ce4f2c09cd0f/flask-marshmallow-0.15.0.tar.gz", hash = "sha256:2083ae55bebb5142fff98c6bbd483a2f5dbc531a8bc1be2180ed5f75e7f3fccc"},
 ]
 "gevent 22.10.2" = [
     {url = "https://files.pythonhosted.org/packages/02/4f/73a79efa65706ded48231f0e932e455cea0dde2cb88ad79c315901055587/gevent-22.10.2-cp310-cp310-macosx_10_15_x86_64.whl", hash = "sha256:990d7069f14dc40674e0d5cb43c68fd3bad8337048613b9bb94a0c4180ffc176"},
@@ -677,6 +753,10 @@ content_hash = "sha256:b7abcb2539cc1164488551c7a456530b511b9bca93ed0d8de8ef15918
     {url = "https://files.pythonhosted.org/packages/ea/60/2400ba59cf2465fa136487ee7299f52121a9d04b2cf8539ad43ad10e70e8/MarkupSafe-2.1.2-cp311-cp311-win_amd64.whl", hash = "sha256:e55e40ff0cc8cc5c07996915ad367fa47da6b3fc091fdadca7f5403239c5fec3"},
     {url = "https://files.pythonhosted.org/packages/f9/aa/ebcd114deab08f892b1d70badda4436dbad1747f9e5b72cffb3de4c7129d/MarkupSafe-2.1.2-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:7313ce6a199651c4ed9d7e4cfb4aa56fe923b1adf9af3b420ee14e6d9a73df65"},
 ]
+"marshmallow 3.20.1" = [
+    {url = "https://files.pythonhosted.org/packages/e4/e0/3e49c0f91f3e8954806c1076f4eae2c95a9d3ed2546f267c683b877d327b/marshmallow-3.20.1.tar.gz", hash = "sha256:5d2371bbe42000f2b3fb5eaa065224df7d8f8597bc19a1bbfa5bfe7fba8da889"},
+    {url = "https://files.pythonhosted.org/packages/ed/3c/cebfdcad015240014ff08b883d1c0c427f2ba45ae8c6572851b6ef136cad/marshmallow-3.20.1-py3-none-any.whl", hash = "sha256:684939db93e80ad3561392f47be0230743131560a41c5110684c16e21ade0a5c"},
+]
 "mysqlclient 2.1.1" = [
     {url = "https://files.pythonhosted.org/packages/14/98/36dbbd5397d60639d9128afefe35c6f45d8265a49650e421a9de4bae3189/mysqlclient-2.1.1-pp38-pypy38_pp73-win_amd64.whl", hash = "sha256:996924f3483fd36a34a5812210c69e71dea5a3d5978d01199b78b7f6d485c855"},
     {url = "https://files.pythonhosted.org/packages/50/5f/eac919b88b9df39bbe4a855f136d58f80d191cfea34a3dcf96bf5d8ace0a/mysqlclient-2.1.1.tar.gz", hash = "sha256:828757e419fb11dd6c5ed2576ec92c3efaa93a0f7c39e263586d1ee779c3d782"},
@@ -818,6 +898,10 @@ content_hash = "sha256:b7abcb2539cc1164488551c7a456530b511b9bca93ed0d8de8ef15918
 "urllib3 1.26.15" = [
     {url = "https://files.pythonhosted.org/packages/21/79/6372d8c0d0641b4072889f3ff84f279b738cd8595b64c8e0496d4e848122/urllib3-1.26.15.tar.gz", hash = "sha256:8a388717b9476f934a21484e8c8e61875ab60644d29b9b39e11e4b9dc1c6b305"},
     {url = "https://files.pythonhosted.org/packages/7b/f5/890a0baca17a61c1f92f72b81d3c31523c99bec609e60c292ea55b387ae8/urllib3-1.26.15-py2.py3-none-any.whl", hash = "sha256:aa751d169e23c7479ce47a0cb0da579e3ede798f994f5816a74e4f4500dcea42"},
+]
+"webargs 8.3.0" = [
+    {url = "https://files.pythonhosted.org/packages/19/62/ae934b85a0aa35c25c4aea820174a871b948642b0c75b3f73d7868938b00/webargs-8.3.0-py3-none-any.whl", hash = "sha256:69d7ac874d746b6f4f47eac923c2abf6fc7788dfca2ebcfd9f4ac52ec9646446"},
+    {url = "https://files.pythonhosted.org/packages/42/e7/f85cb152fcb429594f26850450c402a8cb06a6b0342f62f520e2238cd721/webargs-8.3.0.tar.gz", hash = "sha256:cab207941b0686c4d086c823632ddcd4343151644341a32fcf50b8eaa71e31c7"},
 ]
 "werkzeug 2.2.3" = [
     {url = "https://files.pythonhosted.org/packages/02/3c/baaebf3235c87d61d6593467056d5a8fba7c75ac838b8d100a5e64eba7a0/Werkzeug-2.2.3.tar.gz", hash = "sha256:2e1ccc9417d4da358b9de6f174e3ac094391ea1d4fbef2d667865d819dfd0afe"},

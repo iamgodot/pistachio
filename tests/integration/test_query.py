@@ -16,14 +16,13 @@ def create_user(session, name):
 
 def test_create_user(session):
     user = User(
-        username="foo",
         nickname="foo",
         password="",
         email="",
     )
     Query(session).add(user)
     session.commit()
-    assert session.execute(text("SELECT username FROM user")).all() == [
+    assert session.execute(text("SELECT nickname FROM user")).all() == [
         ("foo",),
     ]
 
@@ -35,8 +34,8 @@ def test_user_follow(session):
     query = Query(session)
 
     foo = query.first(User)
-    bar = query.get(User, username="bar")
-    bat = query.get(User, username="bat")
+    bar = query.get(User, nickname="bar")
+    bat = query.get(User, nickname="bat")
     assert query.list(User) == [foo, bar, bat]
     foo.followers.append(bar)
     assert bar.followings == [foo]
