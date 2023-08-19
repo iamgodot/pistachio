@@ -4,7 +4,8 @@ FROM python:3.11-slim
 WORKDIR /app
 
 COPY . .
-RUN pip install pdm && pdm install
+# Pre-installation for mysqlclient
+RUN apt-get update && apt-get install -y python3-dev default-libmysqlclient-dev build-essential pkg-config && pip install pdm && pdm install
 
 EXPOSE 9527
-CMD ./boot.sh
+CMD make run

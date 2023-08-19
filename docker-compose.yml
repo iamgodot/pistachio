@@ -1,0 +1,19 @@
+services:
+  backend:
+    image: iamgodot/pistachio
+    environment:
+      - GITHUB_CLIENT_ID=
+      - GITHUB_CLIENT_SECRET=
+      - SQLALCHEMY_DATABASE_URI=mysql+mysqldb://root:root@db/pistachio
+      - PISTACHIO_SETTINGS=ProdSettings
+    depends_on:
+      - db
+  db:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=pistachio
+  app:
+    image: iamgodot/pistachio-ui
+    ports:
+      - "8000:80"
