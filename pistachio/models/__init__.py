@@ -25,10 +25,8 @@ class User:
 @dataclass
 class Attachment:
     id: int = field(init=False, default=0)
-    name: str
-    size: int
-    url: str
-    post: "Post" = field(init=False)
+    name: str = ""
+    url: str = ""
 
 
 @dataclass
@@ -36,4 +34,6 @@ class Post:
     id: int = field(init=False, default=0)
     user: User
     attachment: Attachment
+    created_at = None
+    updated_at = None
     description: str = ""

@@ -53,9 +53,8 @@ attachment = Table(
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
     Column("name", String(50), nullable=False),
-    Column("size", Integer, nullable=False, comment="Byte as unit"),
     Column("url", String(100), nullable=False),
-    Column("post_id", ForeignKey("post.id")),
+    Column("post_id", ForeignKey("post.id", ondelete="CASCADE")),
 )
 
 mapper_registry = registry()
@@ -89,7 +88,11 @@ def start_mappers():
         properties={
             "user": relationship(User, back_populates="posts"),
             "attachment": relationship(
-                Attachment, uselist=False, back_populates="post"
+                Attachment,
+                uselist=False,
+                back_populates="post",
+                cascade="all, delete-orphan",
+                passive_deletes=True,
             ),
         },
     )
@@ -97,6 +100,10 @@ def start_mappers():
         Attachment,
         attachment,
         properties={
-            "post": relationship(Post, uselist=False, back_populates="attachment")
+            "post": relationship(
+                Post,
+                uselist=False,
+                back_populates="attachment",
+            )
         },
     )
