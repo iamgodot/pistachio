@@ -8,6 +8,7 @@ from werkzeug.utils import secure_filename
 
 from pistachio.decorators import authenticate
 from pistachio.extensions import ma
+from pistachio.services.chat_pdf import summarize
 from pistachio.services.post import (
     create_post,
     delete_post_by_id,
@@ -19,6 +20,19 @@ from pistachio.services.session_manager import SessionManager
 
 LOGGER = getLogger(__name__)
 bp = Blueprint("post", __name__)
+
+
+class PostSummaryResponseSchema(ma.Schema):
+    summary = Str()
+
+
+@bp.get("/posts/<int:post_id>/summary")
+@response(PostSummaryResponseSchema)
+def get_post_summary(post_id):
+    post = get_post_by_id(post_id, SessionManager())
+    file_url = post["attachment"]["url"]
+    summary = summarize(file_url)
+    return {"summary": summary}
 
 
 class CreatePostPayloadSchema(ma.Schema):

@@ -4,6 +4,7 @@ services:
     environment:
       - GITHUB_CLIENT_ID=
       - GITHUB_CLIENT_SECRET=
+      - CHATPDF_API_KEY=
       - SQLALCHEMY_DATABASE_URI=mysql+mysqldb://root:root@db/pistachio
       - PISTACHIO_SETTINGS=ProdSettings
     depends_on:
