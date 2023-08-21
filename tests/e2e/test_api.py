@@ -89,34 +89,74 @@ def test_user(client, mocker):
         assert resp.status_code == 204
 
 
-# def test_post(client, register, access_token):
-#     from io import BytesIO
-#
-#     from werkzeug.datastructures import FileStorage
-#
-#     user_id = register
-#     resp = client.post(
-#         BASE_URL + "/posts",
-#         data={
-#             "user_id": user_id,
-#             "file": FileStorage(BytesIO(b"Hello world"), filename="test_file"),
-#             "description": "file for test",
-#         },
-#         headers={"Authorization": f"Bearer {access_token}"},
-#     )
-#     assert resp.status_code == 200
-#     assert resp.json["filename"] == "test_file"
-#
-#     post_id = resp.json["id"]
-#     resp = client.get(BASE_URL + f"/posts/{post_id}")
-#     assert resp.json["id"] == post_id
-#
-#     resp = client.delete(BASE_URL + f"/posts/{post_id}")
-#     assert resp.status_code == 204
-#     assert (
-#         client.get(
-#             BASE_URL + "/posts",
-#             headers={"Authorization": f"Bearer {access_token}"},
-#         ).json
-#         == []
-#     )
+def test_post(client):
+    # ---------- Register&Login ----------
+
+    resp = client.post(
+        BASE_URL + "/register",
+        json={
+            "nickname": "foo",
+            "email": "foo@example.com",
+            "password": "secret",
+        },
+    )
+    resp = login(client, {"email": "foo@example.com", "password": "secret"})
+    access_token = resp.json["access_token"]
+    resp = client.get(
+        BASE_URL + "/user", headers={"Authorization": f"Bearer {access_token}"}
+    )
+    user_id = resp.json["id"]
+
+    # -----------------------------------
+
+    from io import BytesIO
+
+    from werkzeug.datastructures import FileStorage
+
+    description = "foobar"
+    resp = client.post(
+        BASE_URL + "/posts",
+        data={
+            "file": FileStorage(BytesIO(b"Hello world"), filename="test_file"),
+            "description": description,
+        },
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
+    assert resp.status_code == 201
+    assert resp.json["description"] == description
+
+    post_id = resp.json["id"]
+    resp = client.get(
+        BASE_URL + f"/posts/{post_id}",
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
+    assert resp.status_code == 200
+    post = resp.json
+    assert post["description"] == description
+
+    resp = client.get(
+        BASE_URL + "/posts",
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
+    assert resp.status_code == 200
+    assert resp.json == [post]
+
+    resp = client.delete(
+        BASE_URL + f"/posts/{post_id}",
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
+    assert resp.status_code == 204
+    assert (
+        client.get(
+            BASE_URL + "/posts",
+            headers={"Authorization": f"Bearer {access_token}"},
+        ).json
+        == []
+    )
+
+    # ---------- Delete user ----------
+
+    client.delete(
+        BASE_URL + f"/users/{user_id}",
+        headers={"Authorization": f"Bearer {access_token}"},
+    )

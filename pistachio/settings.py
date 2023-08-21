@@ -2,6 +2,11 @@ from pydantic import BaseSettings, Field
 
 
 class Settings(BaseSettings):
+    class Config:
+        env_prefix = ""
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+
     SECRET_KEY: str = Field(default="pistachio", env="PISTACHIO_SECRET_KEY")
 
     # TODO: dsn builder
@@ -15,21 +20,14 @@ class Settings(BaseSettings):
     GITHUB_CLIENT_ID: str = ""
     GITHUB_CLIENT_SECRET = ""
 
-    class Config:
-        env_prefix = ""
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        fields = {
-            "GITHUB_CLIENT_ID": {"env": "GITHUB_CLIENT_ID"},
-            "GITHUB_CLIENT_SECRET": {"env": "GITHUB_CLIENT_SECRET"},
-        }
-
     MAX_CONTENT_LENGTH: int = 16 * 1000 * 1000
 
     APIFAIRY_TITLE = "Pistachio API Documentation"
     APIFAIRY_VERSION = ""
     APIFAIRY_UI = "redoc"
     APIFAIRY_UI_PATH = "/api/docs"
+
+    CHATPDF_API_KEY: str = ""
 
 
 class TestSettings(Settings):

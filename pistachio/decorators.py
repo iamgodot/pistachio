@@ -3,7 +3,13 @@ from logging import getLogger
 
 from flask import request
 
-from pistachio.services.auth import TokenDecodeException, decode_token
+from pistachio.services.auth import (
+    TokenDecodeException,
+    UserNotFound,
+    decode_token,
+    get_user_by_id,
+)
+from pistachio.services.session_manager import SessionManager
 
 LOGGER = getLogger(__name__)
 
@@ -29,11 +35,11 @@ def authenticate(view_func):
             return {"error": "Bearer token is required."}, 400
         except TokenDecodeException as e:
             return {"error": str(e)}, 400
-        # user = get_user_from_token(token, Repository(db.session))
-        # user = db.session.execute(db.select(User).filter_by(id=user_id)).scalar()
-        # if not user:
-        #     LOGGER.warning("Request with invalid token: %s", token)
-        #     return {"error": "No valid token found."}, 401
+        try:
+            get_user_by_id(user_id, SessionManager())
+        except UserNotFound as e:
+            LOGGER.debug("User not found for id: %s", user_id)
+            return {"error": str(e)}, 401
         kwargs.update(user_id=user_id)
         return view_func(*args, **kwargs)
 

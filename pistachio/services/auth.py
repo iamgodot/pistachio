@@ -1,4 +1,3 @@
-from dataclasses import asdict
 from datetime import datetime, timedelta, timezone
 from logging import getLogger
 from uuid import uuid4
@@ -10,10 +9,12 @@ from jwt.exceptions import PyJWTError
 from sqlalchemy.exc import MultipleResultsFound, NoResultFound
 
 from pistachio.models import User
-from pistachio.services.session_manager import SessionManager, SessionManagerBase
+from pistachio.services.schema import UserSchema
+from pistachio.services.session_manager import SessionManagerBase
 from pistachio.utils import verify_password
 
 LOGGER = getLogger(__name__)
+user_schema = UserSchema()
 
 
 def encode_token(payload, algorithm="HS256", headers=None):
@@ -101,7 +102,7 @@ def register_user(email, password, sm: SessionManagerBase, **other_info) -> dict
             raise UsernameTaken(f"User already exists: {email}")
         sm.query.add(user)
         sm.commit()
-        return asdict(user)
+        return user_schema.dump(user)
 
 
 def login_user(email, password, sm: SessionManagerBase) -> dict:
@@ -110,7 +111,7 @@ def login_user(email, password, sm: SessionManagerBase) -> dict:
             raise UserNotFound(f"User not found: {email}")
         if verify_password(password, user.password_hash) is False:
             raise InvalidCredential(f"Wrong password for user: {email}")
-        return asdict(user)
+        return user_schema.dump(user)
 
 
 def register_github_user(username, sm: SessionManagerBase, **other_info) -> dict:
@@ -125,7 +126,7 @@ def register_github_user(username, sm: SessionManagerBase, **other_info) -> dict
             )
             sm.query.add(user)
             sm.commit()
-        return asdict(user)
+        return user_schema.dump(user)
 
 
 def login_user_via_github(code) -> dict:
@@ -194,7 +195,7 @@ def get_user_by_id(user_id, sm: SessionManagerBase) -> dict:
             user = sm.query.get(User, id=user_id)
         except (NoResultFound, MultipleResultsFound):
             raise UserNotFound(f"User {user_id} not found")
-        return asdict(user)
+        return user_schema.dump(user)
 
 
 def update_user_by_id(user_id, sm: SessionManagerBase, **params) -> dict:
@@ -205,7 +206,7 @@ def update_user_by_id(user_id, sm: SessionManagerBase, **params) -> dict:
             raise UserNotFound(f"User {user_id} not found")
         sm.query.update(User, params, id=user_id)
         sm.commit()
-        return asdict(user)
+        return user_schema.dump(user)
 
 
 def delete_user_by_id(user_id, sm: SessionManagerBase) -> None:
