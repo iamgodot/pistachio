@@ -3,9 +3,9 @@ API for authentication and user management.
 """
 from logging import getLogger
 
-from apifairy import arguments, body, other_responses, response
+from apifairy import body, response
 from flask import Blueprint, request
-from marshmallow.fields import Int, Str
+from marshmallow.fields import Str
 
 from pistachio.decorators import authenticate
 from pistachio.extensions import ma
@@ -23,7 +23,8 @@ from pistachio.services.auth import (
     register_user,
     update_user_by_id,
 )
-from pistachio.services.session_manager import session_manager
+from pistachio.services.schema import UserSchema as UserResponseSchema
+from pistachio.services.session_manager import SessionManager
 
 LOGGER = getLogger(__name__)
 bp = Blueprint("auth", __name__)
@@ -35,15 +36,6 @@ class RegisterPayloadSchema(ma.Schema):
     password = Str(required=True)
 
 
-class UserResponseSchema(ma.Schema):
-    id = Int()
-    email = Str()
-    username = Str()
-    nickname = Str()
-    avatar = Str()
-    bio = Str()
-
-
 @bp.post("/register")
 @body(RegisterPayloadSchema)
 @response(UserResponseSchema)
@@ -52,7 +44,7 @@ def register(payload):
         return {"error": "Invalid payload"}, 400
     try:
         # FIXME: prevent email like foo@github.com
-        user = register_user(**{**payload, "sm": session_manager})
+        user = register_user(**{**payload, "sm": SessionManager()})
         return user, 201
     except UsernameTaken as e:
         return {"error": str(e)}, 400
@@ -82,7 +74,7 @@ def login(payload):
             gh_user_info = login_user_via_github(payload["github_code"])
             user = register_github_user(
                 gh_user_info["login"],
-                session_manager,
+                SessionManager(),
                 avatar=gh_user_info["avatar_url"],
             )
         except (AuthorizationFailed, UsernameTaken) as e:
@@ -91,7 +83,7 @@ def login(payload):
         if not payload.get("email") or not payload.get("password"):
             return {"error": "Invalid payload"}, 400
         try:
-            user = login_user(**{**payload, "sm": session_manager})
+            user = login_user(**{**payload, "sm": SessionManager()})
         except (UserNotFound, InvalidCredential) as e:
             return {"error": str(e)}, 400
     return {
@@ -105,7 +97,7 @@ def login(payload):
 @response(UserResponseSchema)
 def get_current_user(user_id):
     try:
-        return get_user_by_id(user_id, session_manager)
+        return get_user_by_id(user_id, SessionManager())
     except UserNotFound as e:
         return {"error": str(e)}, 401
 
@@ -119,7 +111,7 @@ def update_current_user(user_id):
     if not payload.get("nickname") and not payload.get("bio"):
         return {"error": "Invalid payload"}, 400
     try:
-        return update_user_by_id(user_id, session_manager, **payload)
+        return update_user_by_id(user_id, SessionManager(), **payload)
     except UserNotFound as e:
         return {"error": str(e)}, 400
 
@@ -129,7 +121,7 @@ def update_current_user(user_id):
 @response(UserResponseSchema)
 def get_user(uid, user_id):
     try:
-        return get_user_by_id(uid, session_manager)
+        return get_user_by_id(uid, SessionManager())
     except UserNotFound as e:
         return {"error": str(e)}, 400
 
@@ -139,7 +131,7 @@ def get_user(uid, user_id):
 # FIXME: user should only be able to delete itself
 def delete_user(uid, user_id):
     try:
-        delete_user_by_id(uid, session_manager)
+        delete_user_by_id(uid, SessionManager())
     except UserNotFound as e:
         return {"error": str(e)}, 400
     return {}, 204
