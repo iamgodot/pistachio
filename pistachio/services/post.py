@@ -6,7 +6,7 @@ from boto3.session import Session
 from botocore.exceptions import ClientError
 from flask import current_app
 
-from pistachio.models import Attachment, Post, User
+from pistachio.models import Post, User
 from pistachio.services.schema import PostSchema
 from pistachio.services.session_manager import SessionManagerBase
 

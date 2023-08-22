@@ -1,7 +1,7 @@
 from sqlalchemy import text
 
 from pistachio.adapters.query import Query
-from pistachio.models import Attachment, Post, User
+from pistachio.models import User
 
 
 def create_user(session, name):
