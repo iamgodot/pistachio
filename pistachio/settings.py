@@ -1,13 +1,15 @@
-from pydantic import BaseSettings, Field
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    class Config:
-        env_prefix = ""
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    model_config = SettingsConfigDict(
+        env_prefix="", env_file=".env", env_file_encoding="utf-8", extra="ignore"
+    )
 
-    SECRET_KEY: str = Field(default="pistachio", env="PISTACHIO_SECRET_KEY")
+    SECRET_KEY: str = Field(
+        default="pistachio", validation_alias="PISTACHIO_SECRET_KEY"
+    )
 
     # TODO: dsn builder
     SQLALCHEMY_DATABASE_URI: str = "mysql+mysqldb://root:root@localhost/pistachio"
@@ -18,14 +20,14 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_TTL: int = 60 * 60 * 24 * 7  # 1 week
 
     GITHUB_CLIENT_ID: str = ""
-    GITHUB_CLIENT_SECRET = ""
+    GITHUB_CLIENT_SECRET: str = ""
 
     MAX_CONTENT_LENGTH: int = 16 * 1000 * 1000
 
-    APIFAIRY_TITLE = "Pistachio API Documentation"
-    APIFAIRY_VERSION = ""
-    APIFAIRY_UI = "redoc"
-    APIFAIRY_UI_PATH = "/api/docs"
+    APIFAIRY_TITLE: str = "Pistachio API Documentation"
+    APIFAIRY_VERSION: str = ""
+    APIFAIRY_UI: str = "redoc"
+    APIFAIRY_UI_PATH: str = "/api/docs"
 
     CHATPDF_API_KEY: str = ""
 
