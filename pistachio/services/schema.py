@@ -1,4 +1,4 @@
-from marshmallow.fields import DateTime, Field, Int, Nested, Str
+from marshmallow.fields import DateTime, Int, Nested, Str
 
 from pistachio.extensions import ma
 
@@ -21,7 +21,8 @@ class AttachmentSchema(ma.Schema):
 class PostSchema(ma.Schema):
     id = Int()
     user = Nested(UserSchema, data_key="author")
-    attachment = Nested(AttachmentSchema)
-    created_at = DateTime("%Y-%m-%d")
-    updated_at = DateTime("%Y-%m-%d")
+    file_name = Str()
+    file_url = Str()
+    created_at = DateTime("%Y-%m-%d %H:%M")
+    updated_at = DateTime("%Y-%m-%d %H:%M")
     description = Str()

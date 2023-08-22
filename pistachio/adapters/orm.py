@@ -42,6 +42,7 @@ post = Table(
     "post",
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("file_name", String(47), nullable=False, default=""),
     Column("description", Text, nullable=False, default=""),
     Column("created_at", DateTime, nullable=False, default=datetime.now),
     Column("updated_at", DateTime, nullable=False, default=datetime.now),

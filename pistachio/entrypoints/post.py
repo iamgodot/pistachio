@@ -1,9 +1,9 @@
 from logging import getLogger
-from os.path import join
 
 from apifairy import body, response
-from flask import Blueprint, current_app, request
-from marshmallow.fields import Field, Int, Nested, Str
+from flask import Blueprint, request
+from marshmallow import pre_dump
+from marshmallow.fields import Field, Str
 from werkzeug.utils import secure_filename
 
 from pistachio.decorators import authenticate
@@ -12,10 +12,13 @@ from pistachio.services.chat_pdf import summarize
 from pistachio.services.post import (
     create_post,
     delete_post_by_id,
+    generate_file_name,
+    get_file_url_from_s3,
     get_post_by_id,
     get_posts,
+    upload_to_s3,
 )
-from pistachio.services.schema import UserSchema as UserResponseSchema
+from pistachio.services.schema import PostSchema
 from pistachio.services.session_manager import SessionManager
 
 LOGGER = getLogger(__name__)
@@ -40,12 +43,14 @@ class CreatePostPayloadSchema(ma.Schema):
     file = Field(metadata={"type": "string", "format": "byte"})
 
 
-class PostResponseSchema(ma.Schema):
-    id = Int()
-    author = Nested(UserResponseSchema)
-    description = Str()
-    file_url = Str()
+class PostResponseSchema(PostSchema):
     created_at = Str()
+    updated_at = Str()
+
+    @pre_dump
+    def get_file_url(self, data, **kwargs):
+        data["file_url"] = get_file_url_from_s3(data.pop("file_name"))
+        return data
 
 
 @bp.post("/posts")
@@ -54,15 +59,14 @@ class PostResponseSchema(ma.Schema):
 @response(PostResponseSchema, 201)
 def create_post_(payload, user_id):
     file = request.files["file"]
+    if not file.filename:
+        return {"error": "Invalid file name"}, 400
     LOGGER.debug("File: %s", file)
     LOGGER.debug("File name: %s", file.filename)
     description = request.form["description"]
-    file_name = secure_filename(file.filename or "")
-    file_path = join(current_app.root_path, file_name)
-    file.save(file_path)
-    post = create_post(user_id, file_name, file_path, description, SessionManager())
-    # TODO: define a hook in schema
-    post["file_url"] = post["attachment"]["url"]
+    file_name = generate_file_name(secure_filename(file.filename))
+    upload_to_s3(file_name, file)
+    post = create_post(user_id, file_name, description, SessionManager())
     return post, 201
 
 
@@ -70,8 +74,6 @@ def create_post_(payload, user_id):
 @authenticate
 def get_posts_(user_id):
     posts = get_posts(SessionManager())
-    for post in posts:
-        post["file_url"] = post["attachment"]["url"]
     schema = PostResponseSchema()
     return [schema.dump(post) for post in posts]
 
@@ -81,7 +83,6 @@ def get_posts_(user_id):
 @response(PostResponseSchema)
 def get_post(post_id, user_id):
     post = get_post_by_id(post_id, SessionManager())
-    post["file_url"] = post["attachment"]["url"]
     return post
 
 

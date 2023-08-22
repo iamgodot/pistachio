@@ -89,7 +89,7 @@ def test_user(client, mocker):
         assert resp.status_code == 204
 
 
-def test_post(client):
+def test_post(client, mocker):
     # ---------- Register&Login ----------
 
     resp = client.post(
@@ -114,6 +114,12 @@ def test_post(client):
     from werkzeug.datastructures import FileStorage
 
     description = "foobar"
+    file_url = "http://fake-url"
+
+    patched_upload = mocker.patch("pistachio.entrypoints.post.upload_to_s3")
+    patched_get_file = mocker.patch(
+        "pistachio.entrypoints.post.get_file_url_from_s3", return_value=file_url
+    )
     resp = client.post(
         BASE_URL + "/posts",
         data={
@@ -124,6 +130,9 @@ def test_post(client):
     )
     assert resp.status_code == 201
     assert resp.json["description"] == description
+    assert resp.json["file_url"] == file_url
+    patched_upload.assert_called()
+    patched_get_file.assert_called()
 
     post_id = resp.json["id"]
     resp = client.get(

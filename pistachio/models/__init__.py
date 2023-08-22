@@ -33,7 +33,7 @@ class Attachment:
 class Post:
     id: int = field(init=False, default=0)
     user: User
-    attachment: Attachment
+    file_name: str = ""
     created_at = None
     updated_at = None
     description: str = ""
