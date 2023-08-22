@@ -29,6 +29,7 @@ extraPaths = ["__pypackages__/3.11/lib/"]
 dev = [
     "pytest>=7.3.1",
     "pytest-mock>=3.10.0",
+    "jupyterlab>=4.0.5",
 ]
 
 [tool.setuptools]
