@@ -18,6 +18,8 @@ dependencies = [
     "sqlalchemy>=2.0.15",
     "apifairy>=1.3.0",
     "flask-marshmallow>=0.15.0",
+    "boto3>=1.28.32",
+    "pydantic-settings>=2.0.3",
 ]
 requires-python = ">=3.8"
 license = {text = "MIT"}
@@ -29,6 +31,9 @@ extraPaths = ["__pypackages__/3.11/lib/"]
 dev = [
     "pytest>=7.3.1",
     "pytest-mock>=3.10.0",
+    "jupyterlab>=4.0.5",
+    "black>=23.7.0",
+    "ruff>=0.0.285",
 ]
 
 [tool.setuptools]
@@ -38,3 +43,16 @@ packages = ["pistachio"]
 log_cli = true
 log_level = 10
 filterwarnings = ["ignore::DeprecationWarning:passlib"]
+
+[tool.black]
+line-length = 88
+include = '\.pyi?$'
+
+[tool.ruff]
+select = ["E", "F", "I"]
+exclude = [".git", ".tox", "venv", "build", "__pypackages__"]
+line-length = 88
+src = ["pistachio", "tests"]
+
+[tool.ruff.isort]
+known-first-party = ["pistachio"]

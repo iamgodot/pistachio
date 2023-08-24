@@ -2,11 +2,14 @@ services:
   backend:
     image: iamgodot/pistachio
     environment:
+      - PISTACHIO_SETTINGS=ProdSettings
+      - SQLALCHEMY_DATABASE_URI=mysql+mysqldb://root:root@db/pistachio
       - GITHUB_CLIENT_ID=
       - GITHUB_CLIENT_SECRET=
       - CHATPDF_API_KEY=
-      - SQLALCHEMY_DATABASE_URI=mysql+mysqldb://root:root@db/pistachio
-      - PISTACHIO_SETTINGS=ProdSettings
+      - AWS_ACCESS_KEY_ID=
+      - AWS_SECRET_ACCESS_KEY=
+      - AWS_REGION_NAME=
     depends_on:
       - db
   db:
