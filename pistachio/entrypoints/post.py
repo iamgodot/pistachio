@@ -2,8 +2,7 @@ from logging import getLogger
 
 from apifairy import body, response
 from flask import Blueprint, request
-from marshmallow import pre_dump
-from marshmallow.fields import Field, Str
+from marshmallow.fields import Field, Int, Nested, Str
 from werkzeug.utils import secure_filename
 
 from pistachio.decorators import authenticate
@@ -12,13 +11,10 @@ from pistachio.services.chat_pdf import summarize
 from pistachio.services.post import (
     create_post,
     delete_post_by_id,
-    generate_file_name,
-    get_file_url_from_s3,
     get_post_by_id,
     get_posts,
-    upload_to_s3,
 )
-from pistachio.services.schema import PostSchema
+from pistachio.services.schema import UserSchema
 from pistachio.services.session_manager import SessionManager
 
 LOGGER = getLogger(__name__)
@@ -27,6 +23,15 @@ bp = Blueprint("post", __name__)
 
 class PostSummaryResponseSchema(ma.Schema):
     summary = Str()
+
+
+class PostResponseSchema(ma.Schema):
+    id = Int()
+    author = Nested(UserSchema)
+    file_url = Str()
+    created_at = Str()
+    updated_at = Str()
+    description = Str()
 
 
 @bp.get("/posts/<int:post_id>/summary")
@@ -42,15 +47,12 @@ class CreatePostPayloadSchema(ma.Schema):
     description = Str()
     file = Field(metadata={"type": "string", "format": "byte"})
 
-
-class PostResponseSchema(PostSchema):
-    created_at = Str()
-    updated_at = Str()
-
-    @pre_dump
-    def get_file_url(self, data, **kwargs):
-        data["file_url"] = get_file_url_from_s3(data.pop("file_name"))
-        return data
+    # @pre_dump
+    # def get_file_name(self, data, **kwargs):
+    #     if not (file_name := data["file"].filename):
+    #         raise ValidationError("File name required")
+    #     data["file_name"] = secure_filename(file_name)
+    #     return data
 
 
 @bp.post("/posts")
@@ -58,15 +60,13 @@ class PostResponseSchema(PostSchema):
 @body(CreatePostPayloadSchema)
 @response(PostResponseSchema, 201)
 def create_post_(payload, user_id):
+    # TODO: get from payload
     file = request.files["file"]
-    if not file.filename:
-        return {"error": "Invalid file name"}, 400
+    file_name = secure_filename(file.filename)
     LOGGER.debug("File: %s", file)
-    LOGGER.debug("File name: %s", file.filename)
+    LOGGER.debug("File name: %s", file_name)
     description = request.form["description"]
-    file_name = generate_file_name(secure_filename(file.filename))
-    upload_to_s3(file_name, file)
-    post = create_post(user_id, file_name, description, SessionManager())
+    post = create_post(user_id, file_name, file, description, SessionManager())
     return post, 201
 
 
