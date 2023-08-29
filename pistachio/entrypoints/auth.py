@@ -24,7 +24,7 @@ from pistachio.services.auth import (
     update_user_by_id,
 )
 from pistachio.services.schema import UserSchema as UserResponseSchema
-from pistachio.services.session_manager import SessionManager
+from pistachio.services.session_manager import session_manager as sm
 
 LOGGER = getLogger(__name__)
 bp = Blueprint("auth", __name__)
@@ -44,7 +44,7 @@ def register(payload):
         return {"error": "Invalid payload"}, 400
     try:
         # FIXME: prevent email like foo@github.com
-        user = register_user(**{**payload, "sm": SessionManager()})
+        user = register_user(**{**payload, "sm": sm})
         return user, 201
     except UsernameTaken as e:
         return {"error": str(e)}, 400
@@ -74,7 +74,7 @@ def login(payload):
             gh_user_info = login_user_via_github(payload["github_code"])
             user = register_github_user(
                 gh_user_info["login"],
-                SessionManager(),
+                sm,
                 avatar=gh_user_info["avatar_url"],
             )
         except (AuthorizationFailed, UsernameTaken) as e:
@@ -83,7 +83,7 @@ def login(payload):
         if not payload.get("email") or not payload.get("password"):
             return {"error": "Invalid payload"}, 400
         try:
-            user = login_user(**{**payload, "sm": SessionManager()})
+            user = login_user(**{**payload, "sm": sm})
         except (UserNotFound, InvalidCredential) as e:
             return {"error": str(e)}, 400
     return {
@@ -97,7 +97,7 @@ def login(payload):
 @response(UserResponseSchema)
 def get_current_user(user_id):
     try:
-        return get_user_by_id(user_id, SessionManager())
+        return get_user_by_id(user_id, sm)
     except UserNotFound as e:
         return {"error": str(e)}, 401
 
@@ -111,7 +111,7 @@ def update_current_user(user_id):
     if not payload.get("nickname") and not payload.get("bio"):
         return {"error": "Invalid payload"}, 400
     try:
-        return update_user_by_id(user_id, SessionManager(), **payload)
+        return update_user_by_id(user_id, sm, **payload)
     except UserNotFound as e:
         return {"error": str(e)}, 400
 
@@ -121,7 +121,7 @@ def update_current_user(user_id):
 @response(UserResponseSchema)
 def get_user(uid, user_id):
     try:
-        return get_user_by_id(uid, SessionManager())
+        return get_user_by_id(uid, sm)
     except UserNotFound as e:
         return {"error": str(e)}, 400
 
@@ -131,7 +131,7 @@ def get_user(uid, user_id):
 # FIXME: user should only be able to delete itself
 def delete_user(uid, user_id):
     try:
-        delete_user_by_id(uid, SessionManager())
+        delete_user_by_id(uid, sm)
     except UserNotFound as e:
         return {"error": str(e)}, 400
     return {}, 204

@@ -15,7 +15,7 @@ from pistachio.services.post import (
     get_posts,
 )
 from pistachio.services.schema import UserSchema
-from pistachio.services.session_manager import SessionManager
+from pistachio.services.session_manager import session_manager as sm
 
 LOGGER = getLogger(__name__)
 bp = Blueprint("post", __name__)
@@ -37,7 +37,7 @@ class PostResponseSchema(ma.Schema):
 @bp.get("/posts/<int:post_id>/summary")
 @response(PostSummaryResponseSchema)
 def get_post_summary(post_id):
-    post = get_post_by_id(post_id, SessionManager())
+    post = get_post_by_id(post_id, sm)
     file_url = post["attachment"]["url"]
     summary = summarize(file_url)
     return {"summary": summary}
@@ -66,14 +66,14 @@ def create_post_(payload, user_id):
     LOGGER.debug("File: %s", file)
     LOGGER.debug("File name: %s", file_name)
     description = request.form["description"]
-    post = create_post(user_id, file_name, file, description, SessionManager())
+    post = create_post(user_id, file_name, file, description, sm)
     return post, 201
 
 
 @bp.get("/posts")
 @authenticate
 def get_posts_(user_id):
-    posts = get_posts(SessionManager())
+    posts = get_posts(sm)
     schema = PostResponseSchema()
     return [schema.dump(post) for post in posts]
 
@@ -82,12 +82,12 @@ def get_posts_(user_id):
 @authenticate
 @response(PostResponseSchema)
 def get_post(post_id, user_id):
-    post = get_post_by_id(post_id, SessionManager())
+    post = get_post_by_id(post_id, sm)
     return post
 
 
 @bp.delete("/posts/<int:post_id>")
 @authenticate
 def delete_post(post_id, user_id):
-    delete_post_by_id(post_id, SessionManager())
+    delete_post_by_id(post_id, sm)
     return {}, 204
