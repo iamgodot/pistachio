@@ -116,10 +116,11 @@ def test_post(client, mocker):
     description = "foobar"
     file_url = "http://fake-url"
 
-    patched_upload = mocker.patch("pistachio.entrypoints.post.upload_to_s3")
-    patched_get_file = mocker.patch(
-        "pistachio.entrypoints.post.get_file_url_from_s3", return_value=file_url
-    )
+    mocked_s3 = mocker.patch("pistachio.services.schema.S3Storage")
+    mocked_s3.return_value.get.return_value = file_url
+    mocker.patch("pistachio.services.post.S3Storage")
+    mocker.patch("pistachio.services.post.S3Storage.write")
+
     resp = client.post(
         BASE_URL + "/posts",
         data={
@@ -131,8 +132,7 @@ def test_post(client, mocker):
     assert resp.status_code == 201
     assert resp.json["description"] == description
     assert resp.json["file_url"] == file_url
-    patched_upload.assert_called()
-    patched_get_file.assert_called()
+    mocked_s3.assert_called()
 
     post_id = resp.json["id"]
     resp = client.get(
