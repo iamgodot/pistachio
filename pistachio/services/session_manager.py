@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from contextvars import ContextVar
 from typing import Self
 
 from sqlalchemy.orm import sessionmaker
+from werkzeug.local import LocalProxy
 
 from pistachio.adapters.query import Query, QueryBase
 from pistachio.extensions import engine
@@ -37,14 +39,19 @@ DEFAULT_SESSION_FACTORY = sessionmaker(bind=engine)
 
 
 class SessionManager(SessionManagerBase):
+    _session_var = ContextVar("session", default=None)
+    session = LocalProxy(_session_var)
+    _query_var = ContextVar("query", default=None)
+    query = LocalProxy(_query_var)
+
     def __init__(self, session_factory=None, query_cls=None) -> None:
         self.session_factory = session_factory or DEFAULT_SESSION_FACTORY
         self.query_cls = query_cls or Query
 
     def __enter__(self) -> Self:
-        # NOTE: init session&query here so we can reuse the manager
-        self.session = self.session_factory()
-        self.query = self.query_cls(self.session)
+        if self._session_var.get() is None:
+            self._session_var.set(self.session_factory())
+            self._query_var.set(self.query_cls(self.session))
         return self
 
     def commit(self):
@@ -55,6 +62,8 @@ class SessionManager(SessionManagerBase):
 
     def close(self):
         self.session.close()
+        self._session_var.set(None)
+        self._query_var.set(None)
 
 
 session_manager = SessionManager()
